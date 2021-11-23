@@ -13,6 +13,12 @@
 
 #define M 0xFF
 
+#define BAUDRATE B38400
+#define MODEMDEVICE "/dev/ttyS1"
+#define _POSIX_SOURCE 1
+
+ struct termios oldtio, newtio;
+
 unsigned char N = 0x00;
 
 /*Variáveis para os ficheiros*/
@@ -43,7 +49,7 @@ void ficheiro(char *file){
 
   if(fp==NULL){
     printf("Ficheiro não existe\n");
-    exit(1);
+    exit(-1);
   }
 
   int ind=0;
@@ -74,18 +80,62 @@ void ficheiro(char *file){
 }
 
 void call_llopen(int fd){
+    
+  bzero(&newtio, sizeof(newtio));
+  newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
+  newtio.c_iflag = IGNPAR;
+  newtio.c_oflag = 0;
+  newtio.c_lflag = 0;
+  newtio.c_cc[VTIME] = 1;
+  newtio.c_cc[VMIN] = 0;
+
+  tcflush(fd, TCIOFLUSH);
+  if ( tcsetattr(fd,TCSANOW,&newtio) == -1) {
+    perror("tcsetattr");
+    exit(-1);
+  }
+  printf("New termios structure set\n");
+
+
   if(llopen(fd)==1) printf("Ligação estabelecidda com sucesso\n");
   else{
+    alarm(0);
     printf("Ligação falhada\n");
-    exit(1);
+    sleep(1);
+      if (tcsetattr(fd, TCSANOW, &oldtio) == -1)
+      {
+        perror("tcsetattr");
+        exit(-1);
+      }
+
+  close(fd);
+    exit(-1);
   }
 }
 
 void call_llclose(int fd){
-  if(llclose(fd)==1) printf("Terminada com sucesso\n");
+  if(llclose(fd)==1){
+   printf("Terminada com sucesso\n");
+   sleep(1);
+      if (tcsetattr(fd, TCSANOW, &oldtio) == -1)
+      {
+        perror("tcsetattr");
+        exit(-1);
+      }
+
+  close(fd);
+  }
   else{
     printf("Terminada sem sucesso\n");
-    exit(1);
+    sleep(1);
+      if (tcsetattr(fd, TCSANOW, &oldtio) == -1)
+      {
+        perror("tcsetattr");
+        exit(-1);
+      }
+
+  close(fd);
+    exit(-1);
   }
 }
 
@@ -145,7 +195,15 @@ void emissor(int fd){
   }
   else{
     printf("Trama START enviada sem sucesso\n");
-    exit(1);
+    sleep(1);
+      if (tcsetattr(fd, TCSANOW, &oldtio) == -1)
+      {
+        perror("tcsetattr");
+        exit(-1);
+      }
+
+  close(fd);
+    exit(-1);
   }
 
   int start=0, end=256;
@@ -176,7 +234,15 @@ void emissor(int fd){
   }
   else{
     printf("Trama END enviada sem sucesso\n");
-    exit(1);
+    sleep(1);
+      if (tcsetattr(fd, TCSANOW, &oldtio) == -1)
+      {
+        perror("tcsetattr");
+        exit(-1);
+      }
+
+  close(fd);
+    exit(-1);
   }
 }
 
