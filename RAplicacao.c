@@ -26,57 +26,19 @@ int packages=0;
 char *nomeFicheiro;
 long int sizeFicheiro;
 
-struct termios oldtio, newtio;
-
 void call_llopen(int fd){
-
-  bzero(&newtio, sizeof(newtio));
-  newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;
-  newtio.c_lflag = 0;
-  newtio.c_cc[VTIME] = 1;
-  newtio.c_cc[VMIN] = 0;
-
-  tcflush(fd, TCIOFLUSH);
-  if ( tcsetattr(fd,TCSANOW,&newtio) == -1) {
-    perror("tcsetattr");
-    exit(-1);
-  }
-  printf("New termios structure set\n");
-
   if(llopen(fd)==1) printf("Ligação estabelecidda com sucesso\n");
   else{
     printf("Ligação falhada\n");
-    sleep(1);
-    if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
-    perror("tcsetattr");
-    exit(-1);
-  }
-    close(fd);
-    exit(-1);
+    exit(1);
   }
 }
 
 void call_llclose(int fd){
-  if(llclose(fd)==1) {
-    printf("Terminada com sucesso\n");
-sleep(1);
-    if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
-    perror("tcsetattr");
-    exit(-1);
-  }
-    close(fd);
-}
+  if(llclose(fd)==1) printf("Terminada com sucesso\n");
   else{
     printf("Terminada sem sucesso\n");
-sleep(1);
-    if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
-    perror("tcsetattr");
-    exit(-1);
-  }
-    close(fd);
-    exit(-1);
+    exit(1);
   }
 }
 
@@ -168,10 +130,9 @@ void ficheiro(){
 
   if(fp==NULL){
     printf("Erro na criação de ficheiro\n");
-    exit(-1);
+    exit(1);
   }
-  for(int i=0; i<sizeFicheiro; i++){
-    fprintf(fp, "%u", mensagem[i]);
-  }
+
+  fwrite(mensagem, 1, sizeof(unsigned char), fp);
 
 }
