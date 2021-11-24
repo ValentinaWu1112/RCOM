@@ -14,7 +14,7 @@
 #define M 0xFF
 
 #define BAUDRATE B38400
-#define MODEMDEVICE "/dev/ttyS1"
+#define MODEMDEVICE "/dev/ttyS11"
 #define _POSIX_SOURCE 1
 
  struct termios oldtio, newtio;
@@ -57,10 +57,6 @@ void ficheiro(char *file){
 }
 
 void call_llopen(int fd){
-  if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
-      perror("tcgetattr");
-      exit(-1);
-    }
 
   bzero(&newtio, sizeof(newtio));
   newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
@@ -157,7 +153,7 @@ unsigned char* criarPacoteControlo(unsigned char controlo, int *sizePacote){
 
 int PacoteEnviar(int *resto){
   long int tmp = (long int) sizeFicheiro;
-  int r=0;
+  int r=1;
   while(tmp-256 > 0){
     r++;
     tmp-=256;
@@ -196,7 +192,6 @@ void emissor(int fd){
   int start=0, end=256;
   while(pacoteEnviar>0){
     if(pacoteEnviar==1){
-      printf("%d -> l1\n", l1);
       pacote= criarPacoteDados(conteudo, start, (long int)sizeFicheiro, 0x00, (unsigned char)l1, &sizePacote);
       res=llwrite(fd,pacote,sizePacote);
       if(res>0){
@@ -235,9 +230,7 @@ void emissor(int fd){
 unsigned char* criarPacoteDados(unsigned char* mensagem, int start,long int end, unsigned char l2, unsigned char l1, int *sizePacote){
   unsigned char* pacote;
   int k = (256 * (int)l2) + (int)l1;
-  int m = k+4;
-  printf("%d -> k\n", m);
-  pacote = (unsigned char*) malloc (m);
+  pacote = (unsigned char*) malloc (4+k);
 
   int i =0;
   pacote[i++]=DADOS;
@@ -250,7 +243,6 @@ unsigned char* criarPacoteDados(unsigned char* mensagem, int start,long int end,
   }
 
   *sizePacote=i;
-  printf("%d->i\n",i);
   N+=0x01;
   return pacote;
 }

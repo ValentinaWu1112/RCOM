@@ -26,9 +26,15 @@ int packagesReceive=0;
 char *nomeFicheiro;
 long int sizeFicheiro;
 
+int nFlag=0;
+
 struct termios oldtio, newtio;
 
 void call_llopen(int fd){
+    if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
+      perror("tcgetattr");
+      exit(-1);
+    }
 
   bzero(&newtio, sizeof(newtio));
   newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
@@ -82,7 +88,7 @@ void call_llclose(int fd){
 
 void pacotesReceber(){
   long int tmp = (long int) sizeFicheiro;
-  int r=1;
+  int r=0;
   while(tmp-256 > 0){
     r++;
     tmp-=256;
@@ -100,11 +106,11 @@ void recetor(int fd){
   ind=0;
   pacotesReceber();
   while(packagesReceive>0){
+    //printf("%d nFlag, %d pacotes por receber\n", nFlag, packagesReceive);
     free(pacote);
     pacote = (unsigned char*) malloc (MAXSIZE);
     sizePacote = llread(fd, pacote);
-    analisarPacote(pacote, sizePacote);
-    packagesReceive--;
+    if (analisarPacote(pacote, sizePacote)) packagesReceive--;
   }
   printf("%d bytes do ficheiro\n", ind);
   ficheiro();
@@ -116,21 +122,34 @@ void recetor(int fd){
   analisarPacote(pacote, sizePacote);
 }
 
-void analisarPacote(unsigned char* pacote, int sizePacote){
+int analisarPacote(unsigned char* pacote, int sizePacote){
   unsigned char c = pacote[0];
   switch (c) {
     case START:
-      pacoteStart(pacote, sizePacote);
-      printf("Trama START bem recebida\n");
+      if(nFlag==(int)pacote[1]){
+        pacoteStart(pacote, sizePacote);
+        nFlag++;
+        printf("Trama START bem recebida\n");
+    return 1;
+      }
       break;
     case END:
-      printf("Trama END bem recebida\n");
+        if(nFlag==(int)pacote[1]){
+        nFlag++;
+        printf("Trama END bem recebida\n");
+    return 1;
+       }
       break;
     case DADOS:
-      pacoteDados(pacote,sizePacote);
-      printf("Trama I bem recebida com %d bytes, pacote %d\n", sizePacote, (int)pacote[1]);
-      break;
+        if(nFlag==(int)pacote[1]){
+            nFlag++;
+            pacoteDados(pacote,sizePacote);
+            printf("Trama I bem recebida com %d bytes, pacote %d\n", sizePacote, (int)pacote[1]);
+return 1;
+        }      
+    break;
   }
+    return 0;
 }
 
 void pacoteStart(unsigned char* pacote, int sizePacote){
@@ -170,6 +189,7 @@ void pacoteDados(unsigned char* pacote, int sizePacote){
     mensagem[i]=pacote[j++];
   }
   ind = ind + end;
+printf("%d pacote", (int)pacote[1]);
   return;
 }
 
