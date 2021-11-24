@@ -43,7 +43,7 @@ int llopen(int fd){
     conta_alarme=0;
 
     while (conta_alarme<3) {
-      fflush(NULL);
+      fflush(stdout);
       res=write(fd,set,5);
 
       flag_alarme=0;
@@ -93,7 +93,7 @@ unsigned char* lerTrama(int fd){
       STOP=TRUE;
     }
   }
-  fflush(NULL);
+  fflush(stdout);
   return rec;
 }
 
@@ -114,14 +114,14 @@ int llclose(int fd){
   conta_alarme=0;
 
   while (conta_alarme<3) {
-    fflush(NULL);
+    fflush(stdout);
     res=write(fd,disc,5);
 
     flag_alarme=0;
     alarm(3);
 
     if(verificarTramaS(fd,DISC)==1) {
-      fflush(NULL);
+      fflush(stdout);
       write(fd,ua,5);
       return 1;
     }
@@ -179,7 +179,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
   unsigned char* tramaI = stuffing(trama, length, &sizeTramaI);
 
   while(conta_alarme<3 || rejeitar){
-    fflush(NULL);
+    fflush(stdout);
     int res1=write(fd,tramaI,sizeTramaI);
     flag_alarme=0;
     alarm(3);

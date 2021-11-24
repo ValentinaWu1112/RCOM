@@ -35,7 +35,7 @@ int llopen(int fd){
   criarTramaSupervisor(ua,UA);
 
   if(verificarTramaS(fd,SET)==1){
-    fflush(NULL);
+    fflush(stdout);
     res=write(fd,ua,5);
     return 1;
   }
@@ -63,7 +63,7 @@ int llclose(int fd){
   criarTramaSupervisor(disc,DISC);
 
   if(verificarTramaS(fd,DISC)==1){
-    fflush(NULL);
+    fflush(stdout);
     res=write(fd,disc,5);
   }
 
@@ -106,7 +106,7 @@ unsigned char* lerTrama(int fd){
     }
   }
   size=i;
-  fflush(NULL);
+  fflush(stdout);
   return rec;
 }
 
@@ -138,13 +138,13 @@ int llread(int fd, unsigned char* buffer){
           Nr=1;
           controlo = (unsigned char*) malloc(5);
           criarTramaSupervisor(controlo, RR1);
-          fflush(NULL);
+          fflush(stdout);
           write(fd, controlo, 5);
         }
         else if(c==C1){
           controlo = (unsigned char*) malloc(5);
           criarTramaSupervisor(controlo, RR0);
-          fflush(NULL);
+          fflush(stdout);
           write(fd, controlo, 5);
         }
         break;
@@ -153,13 +153,13 @@ int llread(int fd, unsigned char* buffer){
           Nr=0;
           controlo = (unsigned char*) malloc(5);
           criarTramaSupervisor(controlo, RR0);
-          fflush(NULL);
+          fflush(stdout);
           write(fd, controlo, 5);
         }
         else if(c==C0){
           controlo = (unsigned char*) malloc(5);
           criarTramaSupervisor(controlo, RR1);
-          fflush(NULL);
+          fflush(stdout);
           write(fd, controlo, 5);
         }
         break;
@@ -170,13 +170,13 @@ int llread(int fd, unsigned char* buffer){
       case 0:
         controlo = (unsigned char*) malloc(5);
         criarTramaSupervisor(controlo, REJ0);
-        fflush(NULL);
+        fflush(stdout);
         write(fd, controlo, 5);
         break;
       case 1:
         controlo = (unsigned char*) malloc(5);
         criarTramaSupervisor(controlo, REJ1);
-        fflush(NULL);
+        fflush(stdout);
         write(fd, controlo, 5);
         break;
     }
