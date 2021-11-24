@@ -18,11 +18,11 @@ int main(int argc, char *argv[]) {
   	     ((strcmp("/dev/ttyS10", argv[1])!=0) &&
   	      (strcmp("/dev/ttyS11", argv[1])!=0) )) {
       printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS10\n");
-      exit(1);
+      exit(-1);
   }
   else if (argc < 3){
     printf("Falta de documento para transmitir\n");
-    exit(1);
+    exit(-1);
   }
 
   fd = open(argv[1], O_RDWR | O_NOCTTY );

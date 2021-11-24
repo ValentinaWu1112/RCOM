@@ -10,9 +10,6 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define BAUDRATE B38400
-#define MODEMDEVICE "/dev/ttyS11"
-#define _POSIX_SOURCE 1
 #define FALSE 0
 #define TRUE 1
 
@@ -39,26 +36,6 @@ void handdler(){
 int llopen(int fd){
   (void) signal(SIGALRM, handdler);
 
-  struct termios oldtio,newtio;
-  bzero(&newtio, sizeof(newtio));
-  newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;
-  newtio.c_lflag = 0;
-  newtio.c_cc[VTIME] = 1;
-  newtio.c_cc[VMIN] = 0;
-
-  tcflush(fd, TCIOFLUSH);
-  if ( tcsetattr(fd,TCSANOW,&newtio) == -1) {
-    perror("tcsetattr");
-    exit(-1);
-  }
-  printf("New termios structure set\n");
-
-  if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
-    perror("tcsetattr");
-    exit(-1);
-  }
 
     unsigned char set[5];
     criarTramaSupervisor(set, SET);
@@ -66,6 +43,7 @@ int llopen(int fd){
     conta_alarme=0;
 
     while (conta_alarme<3) {
+      fflush(NULL);
       res=write(fd,set,5);
 
       flag_alarme=0;
@@ -115,6 +93,7 @@ unsigned char* lerTrama(int fd){
       STOP=TRUE;
     }
   }
+  fflush(NULL);
   return rec;
 }
 
@@ -135,12 +114,14 @@ int llclose(int fd){
   conta_alarme=0;
 
   while (conta_alarme<3) {
+    fflush(NULL);
     res=write(fd,disc,5);
 
     flag_alarme=0;
     alarm(3);
 
     if(verificarTramaS(fd,DISC)==1) {
+      fflush(NULL);
       write(fd,ua,5);
       return 1;
     }
@@ -173,7 +154,7 @@ unsigned char* criarTramaI(unsigned char* pacote, int sizeP, int *sizeI){
       break;
     default:
       printf("Erro no bit\n");
-      exit(1);
+      exit(-1);
       break;
   }
 
@@ -198,6 +179,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
   unsigned char* tramaI = stuffing(trama, length, &sizeTramaI);
 
   while(conta_alarme<3 || rejeitar){
+    fflush(NULL);
     int res1=write(fd,tramaI,sizeTramaI);
     flag_alarme=0;
     alarm(3);
@@ -224,7 +206,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
         break;
       default:
         printf("Erro\n");
-        exit(1);
+        exit(-1);
         break;
     }
   }
@@ -248,7 +230,7 @@ unsigned char* stuffing(unsigned char* trama, int length, int *sizeTramaI){
       break;
     default:
       printf("Erro no bit\n");
-      exit(1);
+      exit(-1);
       break;
   }
   tramaStuff[i++] = (A^tramaStuff[2]);

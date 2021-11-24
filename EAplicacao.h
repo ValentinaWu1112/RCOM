@@ -15,7 +15,7 @@
 #define V -> valor do parametro (T)
 */
 
-unsigned char* criarPacoteControlo(unsigned char controlo, int *sizePacote, int *pacoteEnviar, int *l);
+unsigned char* criarPacoteControlo(unsigned char controlo, int *sizePacote);
 unsigned char* criarPacoteDados(unsigned char* mensagem, int start, long int end, unsigned char l2, unsigned char l1, int *sizePacote);
 void ficheiro(char *file);
 void call_llopen(int fd);

@@ -9,8 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define BAUDRATE B38400
-#define _POSIX_SOURCE 1
+
 #define FALSE 0
 #define TRUE 1
 
@@ -31,31 +30,12 @@ int Nr=0;
 int size;
 
 int llopen(int fd){
-  struct termios oldtio,newtio;
-  bzero(&newtio, sizeof(newtio));
-  newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;
-  newtio.c_lflag = 0;
-  newtio.c_cc[VTIME] = 1;
-  newtio.c_cc[VMIN] = 0;
-
-  tcflush(fd, TCIOFLUSH);
-  if ( tcsetattr(fd,TCSANOW,&newtio) == -1) {
-    perror("tcsetattr");
-    exit(-1);
-  }
-  printf("New termios structure set\n");
-
-  if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
-    perror("tcsetattr");
-    exit(-1);
-  }
 
   unsigned char ua[5];
   criarTramaSupervisor(ua,UA);
 
   if(verificarTramaS(fd,SET)==1){
+    fflush(NULL);
     res=write(fd,ua,5);
     return 1;
   }
@@ -83,6 +63,7 @@ int llclose(int fd){
   criarTramaSupervisor(disc,DISC);
 
   if(verificarTramaS(fd,DISC)==1){
+    fflush(NULL);
     res=write(fd,disc,5);
   }
 
@@ -125,6 +106,7 @@ unsigned char* lerTrama(int fd){
     }
   }
   size=i;
+  fflush(NULL);
   return rec;
 }
 
@@ -156,11 +138,13 @@ int llread(int fd, unsigned char* buffer){
           Nr=1;
           controlo = (unsigned char*) malloc(5);
           criarTramaSupervisor(controlo, RR1);
+          fflush(NULL);
           write(fd, controlo, 5);
         }
         else if(c==C1){
           controlo = (unsigned char*) malloc(5);
           criarTramaSupervisor(controlo, RR0);
+          fflush(NULL);
           write(fd, controlo, 5);
         }
         break;
@@ -169,11 +153,13 @@ int llread(int fd, unsigned char* buffer){
           Nr=0;
           controlo = (unsigned char*) malloc(5);
           criarTramaSupervisor(controlo, RR0);
+          fflush(NULL);
           write(fd, controlo, 5);
         }
         else if(c==C0){
           controlo = (unsigned char*) malloc(5);
           criarTramaSupervisor(controlo, RR1);
+          fflush(NULL);
           write(fd, controlo, 5);
         }
         break;
@@ -184,11 +170,13 @@ int llread(int fd, unsigned char* buffer){
       case 0:
         controlo = (unsigned char*) malloc(5);
         criarTramaSupervisor(controlo, REJ0);
+        fflush(NULL);
         write(fd, controlo, 5);
         break;
       case 1:
         controlo = (unsigned char*) malloc(5);
         criarTramaSupervisor(controlo, REJ1);
+        fflush(NULL);
         write(fd, controlo, 5);
         break;
     }
