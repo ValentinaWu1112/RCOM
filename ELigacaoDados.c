@@ -179,6 +179,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
   unsigned char* tramaI = stuffing(trama, length, &sizeTramaI);
 
   while(conta_alarme<3 || rejeitar){
+    if(conta_alarme==3) break;
     fflush(stdout);
     int res1=write(fd,tramaI,sizeTramaI);
     flag_alarme=0;
