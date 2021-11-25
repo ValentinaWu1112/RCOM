@@ -16,7 +16,7 @@
 void call_llopen(int fd);
 void call_llclose(int fd);
 void recetor(int fd);
-int analisarPacote(unsigned char* pacote, int sizePacote);
+void analisarPacote(unsigned char* pacote, int sizePacote);
 void pacoteStart(unsigned char* pacote, int sizePacote);
 void pacoteDados(unsigned char* pacote, int sizePacote);
 void ficheiro();

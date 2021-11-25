@@ -57,6 +57,10 @@ void ficheiro(char *file){
 }
 
 void call_llopen(int fd){
+  if (tcgetattr(fd, &oldtio) == -1){
+    perror("tcgetattr");
+    exit(-1);
+  }
 
   bzero(&newtio, sizeof(newtio));
   newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
