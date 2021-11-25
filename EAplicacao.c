@@ -52,15 +52,13 @@ void ficheiro(char *file){
     exit(-1);
   }
 
+  printf("%ld tamanho do ficheiro\n", (long int)sizeFicheiro);
+
   fread(conteudo, sizeFicheiro+1, sizeof(conteudo), fp);
 
 }
 
 void call_llopen(int fd){
-  if (tcgetattr(fd, &oldtio) == -1){
-    perror("tcgetattr");
-    exit(-1);
-  }
 
   bzero(&newtio, sizeof(newtio));
   newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
@@ -151,7 +149,6 @@ unsigned char* criarPacoteControlo(unsigned char controlo, int *sizePacote){
   i=i+sizeNomeFicheiro;
 
   *sizePacote=i;
-
   return pacote;
 }
 
@@ -191,7 +188,6 @@ void emissor(int fd){
 
   int pacoteEnviar, l1;
   pacoteEnviar = PacoteEnviar(&l1);
-  printf("%d pacotes a enviar e resto=%d \n", pacoteEnviar, l1);
 
   int start=0, end=256;
   while(pacoteEnviar>0){
@@ -247,6 +243,7 @@ unsigned char* criarPacoteDados(unsigned char* mensagem, int start,long int end,
   }
 
   *sizePacote=i;
+
   N+=0x01;
   return pacote;
 }

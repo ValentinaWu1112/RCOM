@@ -31,10 +31,10 @@ int nFlag=0;
 struct termios oldtio, newtio;
 
 void call_llopen(int fd){
-  if (tcgetattr(fd, &oldtio) == -1){
-    perror("tcgetattr");
-    exit(-1);
-  }
+    if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
+      perror("tcgetattr");
+      exit(-1);
+    }
 
   bzero(&newtio, sizeof(newtio));
   newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
@@ -105,12 +105,13 @@ void recetor(int fd){
 
   ind=0;
   pacotesReceber();
+
+  printf("%d pacotes a receber\n", packagesReceive);
   while(packagesReceive>0){
     free(pacote);
     pacote = (unsigned char*) malloc (MAXSIZE);
     sizePacote = llread(fd, pacote);
-    analisarPacote(pacote, sizePacote);
-    packagesReceive--;
+    if (analisarPacote(pacote, sizePacote)) packagesReceive--;
   }
   printf("%d bytes do ficheiro\n", ind);
   ficheiro();
@@ -122,30 +123,28 @@ void recetor(int fd){
   analisarPacote(pacote, sizePacote);
 }
 
-void analisarPacote(unsigned char* pacote, int sizePacote){
+int analisarPacote(unsigned char* pacote, int sizePacote){
   unsigned char c = pacote[0];
   switch (c) {
     case START:
-      if(nFlag==(int)pacote[1]) {
-        pacoteStart(pacote, sizePacote);
-        nFlag++;
-      }
+      pacoteStart(pacote, sizePacote);
       printf("Trama START bem recebida\n");
+      return 1;
       break;
     case END:
-      if(nFlag==(int)pacote[1]) {
-        printf("Trama END bem recebida\n");
-        nFlag++;
-      }
+      printf("Trama END bem recebida\n");
+      return 1;
       break;
     case DADOS:
-      if(nFlag==(int)pacote[1]) {
-        pacoteDados(pacote,sizePacote);
+      if(nFlag==(int)pacote[1]){
         nFlag++;
-      }
-      printf("Trama I bem recebida com %d bytes, pacote %d\n", sizePacote, (int)pacote[1]);
-      break;
+        if(nFlag==256){nFlag=0;}
+        pacoteDados(pacote,sizePacote);
+        printf("Trama I bem recebida com %d bytes, pacote %d\n", sizePacote, (int)pacote[1]);
+        return 1;}
+    break;
   }
+    return 0;
 }
 
 void pacoteStart(unsigned char* pacote, int sizePacote){
