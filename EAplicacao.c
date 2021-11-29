@@ -14,7 +14,7 @@
 #define M 0xFF
 
 #define BAUDRATE B38400
-#define MODEMDEVICE "/dev/ttyS11"
+#define MODEMDEVICE "/dev/ttyS1"
 #define _POSIX_SOURCE 1
 
  struct termios oldtio, newtio;
@@ -59,6 +59,10 @@ void ficheiro(char *file){
 }
 
 void call_llopen(int fd){
+  if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
+      perror("tcgetattr");
+      exit(-1);
+    }
 
   bzero(&newtio, sizeof(newtio));
   newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;

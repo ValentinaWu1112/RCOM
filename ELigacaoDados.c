@@ -114,11 +114,11 @@ int llclose(int fd){
   conta_alarme=0;
 
   while (conta_alarme<3) {
+    flag_alarme=0;
+    alarm(3);
     fflush(stdout);
     res=write(fd,disc,5);
 
-    flag_alarme=0;
-    alarm(3);
 
     if(verificarTramaS(fd,DISC)==1) {
       fflush(stdout);
@@ -179,12 +179,13 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
   unsigned char* tramaI = stuffing(trama, length, &sizeTramaI);
 
   while(conta_alarme<3 || rejeitar){
-    if(conta_alarme==3) break;
+    //printf("%d conta_alarme || %d rejeitar\n", conta_alarme, rejeitar);
+    if(conta_alarme==3) return -1;
     fflush(stdout);
     int res1=write(fd,tramaI,sizeTramaI);
+    //printf("%d envidos\n",res1);
     flag_alarme=0;
     alarm(3);
-
 
     switch (Ns) {
       case 0:
@@ -193,6 +194,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
           return res1;
         }
         else if(verificarTramaS(fd,REJ0)){
+          //printf("REJ0 recebido\n");
           rejeitar=1;
         }
         break;
@@ -202,6 +204,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
           return res1;
         }
         else if(verificarTramaS(fd,REJ1)){
+          //printf("REJ1 recebido\n");
           rejeitar=1;
         }
         break;
