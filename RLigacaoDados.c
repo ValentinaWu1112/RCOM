@@ -105,6 +105,7 @@ unsigned char* lerTrama(int fd){
       STOP=TRUE;
     }
   }
+  //printf("%d recebidos\n", i);
   size=i;
   fflush(stdout);
   return rec;
@@ -172,12 +173,16 @@ int llread(int fd, unsigned char* buffer){
         criarTramaSupervisor(controlo, REJ0);
         fflush(stdout);
         write(fd, controlo, 5);
+        //printf("Mandado REJ0\n");
+        return 0;
         break;
       case 1:
         controlo = (unsigned char*) malloc(5);
         criarTramaSupervisor(controlo, REJ1);
         fflush(stdout);
         write(fd, controlo, 5);
+        //printf("Mandado REJ1\n");
+        return 0;
         break;
     }
   }

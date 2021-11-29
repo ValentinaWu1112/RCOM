@@ -108,10 +108,18 @@ void recetor(int fd){
 
   printf("%d pacotes a receber\n", packagesReceive);
   while(packagesReceive>0){
+    //printf("%d pacotes em falta\n",packagesReceive);
     free(pacote);
     pacote = (unsigned char*) malloc (MAXSIZE);
     sizePacote = llread(fd, pacote);
-    if (analisarPacote(pacote, sizePacote)) packagesReceive--;
+    //printf("%d -> sizePacote\n", sizePacote);
+    if (sizePacote>0){
+        if (analisarPacote(pacote, sizePacote)) packagesReceive--;
+    }
+    else{
+        //printf("Entrei aqui no 0\n");
+        continue;
+    }
   }
   printf("%d bytes do ficheiro\n", ind);
   ficheiro();
