@@ -201,12 +201,32 @@ void emissor(int fd){
       if(res>0){
         printf("Trama I %d enviada com sucesso, com %d bits\n",(int)pacote[1], res);
       }
+      else{
+        printf("Trama I recebida sem sucesso\n");
+        sleep(1);
+        if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
+          perror("tcsetattr");
+          exit(-1);
+        }
+        close(fd);
+        exit(-1);
+      }
     }
     else{
       pacote= criarPacoteDados(conteudo, start, end, 0x01, 0x00, &sizePacote);
       res=llwrite(fd,pacote,sizePacote);
       if(res>0){
         printf("Trama I %d enviada com sucesso, com %d bits\n",(int)pacote[1] ,res);
+      }
+      else{
+        printf("Trama I recebida sem sucesso\n");
+        sleep(1);
+    if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
+      perror("tcsetattr");
+      exit(-1);
+    }
+    close(fd);
+    exit(-1);
       }
       start=end;
       end+=256;
