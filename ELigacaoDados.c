@@ -99,7 +99,6 @@ unsigned char* lerTrama(int fd){
 
 int verificarTramaS(int fd, unsigned char comando){
   unsigned char* rec=lerTrama(fd);
-
   alarm(0);
   if(rec[3]==(rec[1]^rec[2]) && rec[2]==comando) return 1;
   else return -1;
@@ -184,7 +183,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
     if(conta_alarme==3) return -1;
     fflush(stdout);
     int res1=write(fd,tramaI,sizeTramaI);
-    printf("%d envidos\n",res1);
+    //printf("%d envidos\n",res1);
     flag_alarme=0;
     alarm(3);
 
@@ -194,7 +193,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
           Ns=1;
           return res1;
         }
-        else if(verificarTramaS(fd,REJ0)){
+        else if(verificarTramaS(fd,REJ0)==1){
           printf("REJ0 recebido\n");
           rejeitar=1;
         }
@@ -204,7 +203,7 @@ int llwrite(int fd, unsigned char* pacote, int sizePacote){
           Ns=0;
           return res1;
         }
-        else if(verificarTramaS(fd,REJ1)){
+        else if(verificarTramaS(fd,REJ1)==1){
           printf("REJ1 recebido\n");
           rejeitar=1;
         }
