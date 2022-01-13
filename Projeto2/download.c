@@ -9,7 +9,7 @@
 #include <string.h>
 #include <netdb.h>
 
-/*ftp://[rcom:rcom@]ftp.up.pt/pub/kodi/timestamp.txt*/
+/*ftp://[anonymous:anonymous@]ftp.up.pt/pub/kodi/timestamp.txt*/
 
 #define SERVER_PORT 21
 
@@ -35,7 +35,6 @@ int main(int argc, char  *argv[]) {
   /*TCP socket*/
   int sockfd;
   struct sockaddr_in server_addr;
-  size_t bytes;
 
   /*Host Name*/
   struct hostent *h;
@@ -79,19 +78,41 @@ int main(int argc, char  *argv[]) {
     exit(-1);
   }
 
-  char buff;
-  for(int i=0; i<392; i++){
-    read(sockfd,&buff,1);
-    printf("%c", buff);
-  }//printf("\n");
+  int code;
 
-  char *send = "user anonymous\n";
-  int res = write(sockfd, send, strlen(send));
-  printf("%d enviados\n", res);
-  for(int i=0; i<100; i++){
-    read(sockfd,&buff,1);
-    printf("%c", buff);
-  }printf("\n");
+  /*Estabelimento da coneccao com o servidor*/
+  code = readServer(sockfd);
+
+  /*Enviar user e resposta*/
+  if(code==OKAY) {
+    writeServer(sockfd, "user ", user);
+    code = readServer(sockfd);
+  }
+  else {
+    perror("Conecção estabelicida sem sucesso\n");
+  }
+
+  /*Enviar pass e resposta*/
+  if(code==USER){
+    writeServer(sockfd, "pass ", password);
+    code = readServer(sockfd);
+  }
+  else{
+    perror("Erro no user");
+  }
+
+  int porta;
+  if(code==PASS){
+    writeServer(sockfd, "pasv ", "");
+    code = readServerPassive(sockfd,&porta);
+    printf("porta: %d\n", porta);
+  }
+
+  writeServer(sockfd, "quit ", "");
+  code = readServer(sockfd);
+
+  if(code==QUIT) close(sockfd);
+
   return 0;
 }
 
