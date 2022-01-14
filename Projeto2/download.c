@@ -33,8 +33,9 @@ int main(int argc, char  *argv[]) {
   }
 
   /*TCP socket*/
-  int sockfd;
+  int sockfd, sockfd2;
   struct sockaddr_in server_addr;
+  struct sockaddr_in server_addr_client;
 
   /*Host Name*/
   struct hostent *h;
@@ -108,10 +109,40 @@ int main(int argc, char  *argv[]) {
     printf("porta: %d\n", porta);
   }
 
-  writeServer(sockfd, "quit ", "");
+  /*server address handling*/
+	bzero((char *)&server_addr_client, sizeof(server_addr_client));
+	server_addr_client.sin_family = AF_INET;
+	server_addr_client.sin_addr.s_addr = inet_addr(inet_ntoa(*((struct in_addr *)h->h_addr))); /*32 bit Internet address network byte ordered*/
+	server_addr_client.sin_port = htons(porta);										   /*server TCP port must be network byte ordered */
+
+	/*open an TCP socket*/
+	if ((sockfd2 = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		perror("socket()");
+		exit(0);
+	}
+	/*connect to the server*/
+	if (connect(sockfd2, (struct sockaddr *)&server_addr_client, sizeof(server_addr_client)) < 0)
+	{
+		perror("connect()");
+		exit(0);
+	}
+
+  writeServer(sockfd, "retr ", url_path);
   code = readServer(sockfd);
 
-  if(code==QUIT) close(sockfd);
+  if(code==RETR){
+    readServerFile(sockfd2, filename);
+    code = readServer(sockfd);
+  }
+  else{
+    perror("Erro");
+  }
+
+  if(code==TRANSF){
+    close(sockfd);
+    close(sockfd2);
+  }
 
   return 0;
 }
@@ -167,10 +198,12 @@ void getInformation(char *arg){
 }
 
 void getFileName(char *path){
+  char *tmp = (char*)malloc(strlen(path)*sizeof(char));
+  strcpy(tmp,path);
   filename=(char*)malloc(MAXSIZE*sizeof(char));
 
   char *token;
-  token=strtok(path,"/");
+  token=strtok(tmp,"/");
   while (token!=NULL) {
     memcpy(filename,token, strlen(token)+1);
     token=strtok(NULL,"/");

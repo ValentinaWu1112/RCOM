@@ -13,6 +13,6 @@
 int readServer(int sockfd);
 int writeServer(int sockfd, char* comando, char* path);
 int readServerPassive(int sockfd, int *port);
-
+void readServerFile(int sockfd, char* filename);
 
 #endif

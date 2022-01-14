@@ -79,7 +79,21 @@ int writeServer(int sockfd, char* comando, char* path){
   strcat(send,path);
   send[strlen(send)]='\n';
   printf("%s", send);
-
   int res = write(sockfd, send, strlen(send));
   return res;
+}
+
+void readServerFile(int sockfd, char* filename){
+  FILE *file = fopen((char*)filename,"wb+");
+
+  FILE* fp = fdopen(sockfd, "r");
+	char* buff;
+	size_t bytes = 0;
+  int size;
+
+	while((size=getline(&buff, &bytes, fp)) > 0){
+    fwrite(buff, size, 1, file);
+	}
+
+  fclose(file);
 }
