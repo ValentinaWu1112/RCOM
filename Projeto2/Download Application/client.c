@@ -35,7 +35,7 @@ int readServerPassive(int sockfd, int *port){
 	size_t bytes = 0;
 	char response[3];
 
-  char bit[3];
+  char* bit=(char*)malloc(sizeof(char)*3);
   int state=0;
   int ip[6];
   int ind_bit=0, ind_ip=0;
@@ -55,7 +55,8 @@ int readServerPassive(int sockfd, int *port){
         else if(buff[i]==','){
           ip[ind_ip++]=atoi(bit);
           ind_bit=0;
-          memset(bit,0,3);
+          free(bit);
+            bit=(char*)malloc(sizeof(char)*3);
         }
         else if(buff[i]==')'){
           ip[ind_ip++]=atoi(bit);
@@ -68,6 +69,8 @@ int readServerPassive(int sockfd, int *port){
 			break;
 		}
 	}
+    /*for(int i=0;i<6;i++) printf("%d ", ip[i]);
+printf("\n");*/
   (*port)=ip[4]*256+ip[5];
   int code = atoi(response);
   return code;
